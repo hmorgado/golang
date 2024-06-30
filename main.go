@@ -2,19 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
-func main() {
-	tfFile := "./main.hcl"
-	fileContent, err := ioutil.ReadFile(tfFile)
-	if err != nil {
-		log.Fatal("Failed to read file: %v", err)
-
+func check(e error) {
+	if e != nil {
+		panic(e)
 	}
+}
+
+func main() {
+	fmt.Print("-------------------\n")
+
+	tfFile := "./main.hcl"
+	fileContent, err := os.ReadFile(tfFile)
+	check(err)
+	fmt.Print(string(tfFile))
+
 	parser := hclparse.NewParser()
 
 	parsedHCL, diagnostics := parser.ParseHCL(fileContent, tfFile)
@@ -22,9 +28,7 @@ func main() {
 		log.Fatalf("Failed to parse HCL: %v", diagnostics)
 	}
 
-	var variables = hcldec.Variables(parsedHCL.Body, tfFile)
-
-	for _, variable := range variables {
-		fmt.Printf("Variable: %s, Type: %s, Default: %s\n", variable.Name(), variable.Type(), variable.Default)
-	}
+	fmt.Print(parsedHCL)
+	// ./main.hcl&{map[] [0xc0000ea000] map[] map[] ./main.hcl:1,1-4,2 ./main.hcl:4,2-2}
+	fmt.Print("\n-------------------\n")
 }
